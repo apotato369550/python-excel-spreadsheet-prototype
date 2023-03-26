@@ -9,11 +9,38 @@ import os
 # add more examples of sample data
 # format this object better smh
 invoices = {
-    'Customer A': {1: {'Amount': 1000, 'DueDate': date(2023, 3, 15)}, 
-                   2: {'Amount': 500, 'DueDate': date(2023, 3, 1)},
-                   3: {'Amount': 2000, 'DueDate': date(2023, 2, 1)}},
-    'Customer B': {4: {'Amount': 750, 'DueDate': date(2023, 3, 10)},
-                   5: {'Amount': 1000, 'DueDate': date(2023, 2, 1)}}}
+    'JAY': {
+        1: {'Amount': 1000, 'DueDate': date(2023, 3, 15)}, 
+        2: {'Amount': 500, 'DueDate': date(2023, 3, 1)},
+        3: {'Amount': 2000, 'DueDate': date(2023, 2, 1)}
+    },
+    'CJ': {
+        4: {'Amount': 750, 'DueDate': date(2023, 3, 10)},
+        5: {'Amount': 1000, 'DueDate': date(2023, 2, 1)}
+    },
+    'Kim': {
+        4: {'Amount': 750, 'DueDate': date(2023, 3, 10)},
+        5: {'Amount': 1000, 'DueDate': date(2023, 2, 1)}
+    },
+    'Ghemar': {
+        4: {'Amount': 750, 'DueDate': date(2023, 3, 10)},
+        5: {'Amount': 1000, 'DueDate': date(2023, 2, 1)}
+    },
+    'Vincent': {
+        4: {'Amount': 750, 'DueDate': date(2023, 3, 10)},
+        5: {'Amount': 1000, 'DueDate': date(2023, 2, 1)}
+    },
+    'Belha': {
+        4: {'Amount': 750, 'DueDate': date(2023, 3, 10)},
+        5: {'Amount': 1000, 'DueDate': date(2023, 2, 1)}
+    },
+    'Isabella': {
+        4: {'Amount': 750, 'DueDate': date(2023, 3, 10)},
+        5: {'Amount': 1000, 'DueDate': date(2023, 2, 1)}
+    }
+}
+
+
 
 # Create workbook and worksheet
 wb = openpyxl.Workbook()
