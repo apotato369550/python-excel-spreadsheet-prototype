@@ -3,6 +3,11 @@ from datetime import date
 import os
 
 # Sample data
+
+# issue:
+# think of more exciting names other than "Customer A" and "Customer B"
+# add more examples of sample data
+# format this object better smh
 invoices = {
     'Customer A': {1: {'Amount': 1000, 'DueDate': date(2023, 3, 15)}, 
                    2: {'Amount': 500, 'DueDate': date(2023, 3, 1)},
