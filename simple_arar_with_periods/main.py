@@ -46,12 +46,6 @@ invoices = {
     }
 }
 
-
-ws['A1'] = "Customer Name"
-ws['B1'] = "Invoice Number"
-ws['C1'] = "Invoice Amount"
-ws['D1'] = "Due Date"
-ws['E1'] = "Days Overdue"
 ws['F1'] = "0-30 days"
 ws['G1'] = "31-60 days"
 ws['H1'] = "61-90 days"
