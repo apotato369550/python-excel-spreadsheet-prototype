@@ -42,7 +42,7 @@ while True:
 
     while True:
         try:
-            due_date = datetime.strptime(input("Please enter the payement's due date (format: mm/dd/yyyy)"), "%m/%d/%y")
+            due_date = datetime.strptime(input("Please enter the payement's due date (format: mm/dd/yyyy)"), "%m/%d/%Y")
             break
         except ValueError:
             print("Please enter a valid date in the following format: mm/dd/yyyy")
@@ -54,10 +54,7 @@ print(f"Amount Due: {str(amount_due)}")
 print(f"Date Due: {due_date}")
 
 
-if filename:
-    workbook.save(f"{filename}.xlsx")
-else:
-    workbook.save("arar.xlsx")
+workbook.save(f"{filename}")
 
 while True:
     view = input("Do you wish to run Excel and view the created file? (Y/N): ").lower()
