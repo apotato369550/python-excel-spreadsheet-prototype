@@ -1,5 +1,5 @@
 import openpyxl
-from datetime import date
+from datetime import datetime
 import os
 
 # Create workbook and worksheet
@@ -16,33 +16,33 @@ ws['E1'] = "Days Overdue"
 
 invoices = {
     'JAY': {
-        1: {'Amount': 1000, 'DueDate': date(2023, 10, 22)}, 
-        2: {'Amount': 500, 'DueDate': date(2023, 5, 15)},
-        3: {'Amount': 2000, 'DueDate': date(2023, 6, 10)}
+        1: {'Amount': 1000, 'DueDate': datetime(2023, 10, 22)}, 
+        2: {'Amount': 500, 'DueDate': datetime(2023, 5, 15)},
+        3: {'Amount': 2000, 'DueDate': datetime(2023, 6, 10)}
     },
     'CJ': {
-        4: {'Amount': 750, 'DueDate': date(2023, 5, 17)},
-        5: {'Amount': 1000, 'DueDate': date(2023, 4, 21)}
+        4: {'Amount': 750, 'DueDate': datetime(2023, 5, 17)},
+        5: {'Amount': 1000, 'DueDate': datetime(2023, 4, 21)}
     },
     'Kim': {
-        4: {'Amount': 750, 'DueDate': date(2023, 12, 27)},
-        5: {'Amount': 1000, 'DueDate': date(2023, 8, 6)}
+        4: {'Amount': 750, 'DueDate': datetime(2023, 12, 27)},
+        5: {'Amount': 1000, 'DueDate': datetime(2023, 8, 6)}
     },
     'Ghemar': {
-        4: {'Amount': 750, 'DueDate': date(2023, 5, 10)},
-        5: {'Amount': 1000, 'DueDate': date(2023, 8, 4)}
+        4: {'Amount': 750, 'DueDate': datetime(2023, 5, 10)},
+        5: {'Amount': 1000, 'DueDate': datetime(2023, 8, 4)}
     },
     'Vincent': {
-        4: {'Amount': 750, 'DueDate': date(2023, 4, 9)},
-        5: {'Amount': 1000, 'DueDate': date(2023, 7, 4)}
+        4: {'Amount': 750, 'DueDate': datetime(2023, 4, 9)},
+        5: {'Amount': 1000, 'DueDate': datetime(2023, 7, 4)}
     },
     'Belha': {
-        4: {'Amount': 750, 'DueDate': date(2023, 9, 29)},
-        5: {'Amount': 1000, 'DueDate': date(2023, 9, 27)}
+        4: {'Amount': 750, 'DueDate': datetime(2023, 9, 29)},
+        5: {'Amount': 1000, 'DueDate': datetime(2023, 9, 27)}
     },
     'Isabella': {
-        4: {'Amount': 750, 'DueDate': date(2023, 7, 10)},
-        5: {'Amount': 1000, 'DueDate': date(2023, 7, 1)}
+        4: {'Amount': 750, 'DueDate': datetime(2023, 7, 10)},
+        5: {'Amount': 1000, 'DueDate': datetime(2023, 7, 1)}
     }
 }
 
@@ -67,15 +67,8 @@ for customer, inv in invoices.items():
     for invoice_number, inv_details in inv.items():
         invoice_amount = inv_details['Amount']
         due_date = inv_details['DueDate']
-        # days_overdue = (date.today() - due_date).days
-        days_overdue = (due_date - date.today()).days
-        print(customer)
-        print(date.today())
-        print("minus")
-        print(due_date)
-        print(days_overdue)
+        days_overdue = (due_date - datetime.today()).days
         if days_overdue >= 0:
-            print("yey")
             ws.cell(row=row, column=1, value=customer)
             ws.cell(row=row, column=2, value=invoice_number)
             ws.cell(row=row, column=3, value=invoice_amount)
