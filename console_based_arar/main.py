@@ -95,8 +95,6 @@ while True:
     if confirm == 'n':
         break
 
-print(invoices)
-
 row = 2
 for customer, invoice in invoices.items():
     for invoice_number, invoice_details in invoice.items():
