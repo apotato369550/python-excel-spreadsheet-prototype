@@ -5,7 +5,7 @@ from os import system
 # create workbook and worksheet
 workbook = openpyxl.Workbook()
 worksheet = workbook.active
-worksheet.title = "AR Aging Report " + str(datetime.today())
+worksheet.title = "AR Aging Report"
 
 # header/title rwo
 worksheet['A1'] = "Customer Name"
