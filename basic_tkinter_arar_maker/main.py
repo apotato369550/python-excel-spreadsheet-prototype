@@ -18,6 +18,8 @@ class ARARMaker(tk.Tk):
         self.resizable(False, False)
 
         self.invoices = {}
+        self.period_totals = [0, 0, 0, 0, 0, 0]
+        self.invoice_total = 0
 
         self.make_user_interface()
         self.create_workbook()
@@ -27,47 +29,139 @@ class ARARMaker(tk.Tk):
         return
 
     def update_invoices(self):
-        return
+        # test me
+        self.workbook = openpyxl.Workbook()
+        self.worksheet = self.workbook.active
+        self.worksheet.title = "ARAR"
+
+        self.headers = ["Customer Name", "Invoice Number", "Invoice Amount", "Due Date", "Days Overdue", "<0 days", "0-30 days", "31-60 days", "61-90 days", "91-120 days", "Over 120 days"]
+
+        # Loop through the headers and set the values in the cells
+        for index, header in enumerate(self.headers):
+            self.worksheet.cell(row=1, column=index+1, value=header)
+        
+        row = 2
+        for invoice_number, invoice in self.invoices.items():
+            invoice_amount = float(invoice["amount"])
+            customer_name = invoice["customer_name"]
+            due_date = invoice["due_date"]
+            days_overdue = (self.due_date - datetime.today()).days
+
+            self.invoice_total += invoice_amount
+
+            self.worksheet.cell(row=row, column=1, value=customer_name)
+            self.worksheet.cell(row=row, column=2, value=invoice_number)
+            self.worksheet.cell(row=row, column=3, value=invoice_amount)
+            self.worksheet.cell(row=row, column=4, value=due_date)
+            self.worksheet.cell(row=row, column=5, value=days_overdue)
+
+            if days_overdue / 30 <= 0:
+                self.worksheet.cell(row=row, column=6, value=invoice_amount)
+                self.period_totals[0] += invoice_amount
+            else:
+                self.worksheet.cell(row=row, column=6, value=0)
+
+            if days_overdue / 30 <= 1 and days_overdue / 30 > 0:
+                self.worksheet.cell(row=row, column=7, value=invoice_amount)
+                self.period_totals[1] += invoice_amount
+            else:
+                self.worksheet.cell(row=row, column=7, value=0)
+
+            if days_overdue / 30 <= 2 and days_overdue / 30 >  3:
+                self.worksheet.cell(row=row, column=8, value=invoice_amount)
+                self.period_totals[2] += invoice_amount
+            else:
+                self.worksheet.cell(row=row, column=8, value=0)
+
+            if days_overdue / 30 <= 3 and days_overdue / 30 > 4:
+                self.worksheet.cell(row=row, column=9, value=invoice_amount)
+                self.period_totals[3] += invoice_amount
+            else:
+                self.worksheet.cell(row=row, column=9, value=0)
+
+            if days_overdue / 30 <= 4 and days_overdue / 30 > 5:
+                self.worksheet.cell(row=row, column=10, value=invoice_amount)
+                self.period_totals[4] += invoice_amount
+            else:
+                self.worksheet.cell(row=row, column=10, value=0)
+
+            if days_overdue / 30 > 6:
+                self.worksheet.cell(row=row, column=11, value=invoice_amount)
+                self.period_totals[5] += invoice_amount
+            else:
+                self.worksheet.cell(row=row, column=11, value=0)
+                
+            row += 1
+        
+        self.worksheet.cell(row=row, column=2, value="Invoice Total")
+        self.worksheet.cell(row=row, column=3, value=self.invoice_total)
+        
+        for i in range(len(self.period_totals)):
+            self.worksheet.cell(row=row, column=6+i, value=self.period_totals[i])
+
+        self.file_name = "ARAR.xlsx"
+        self.workbook.save(self.file_name)
     
     def load_invoices(self):
         # load invoices into dictionary
         print("loading invoices")
         self.workbook = openpyxl.load_workbook(filename="ARAR.xlsx")
         self.worksheet = self.workbook.active
-        for row in itertools.islice(self.worksheet.iter_rows(values_only=True), 1, None):            
+        
+        # re-do entire section below
+        i = 0
+        for row in self.worksheet.iter_rows(values_only=True):
+            self.customer_name = row[0]
+            self.invoice_number = row[1]
+            self.amount_due = row[2]
+            self.due_date = row[3]
+
+            # make try catch statements for typecasting each variable
+            if not self.customer_name:
+                mb.showerror("Load Invoices: Empty Customer name", "Customer name is empty. Please enter a customer name in the excel file.")
+                continue
+
             try:
-                self.customer_name = row[0]
-                self.invoice_number = int(row[1])
-                self.amount_due = float(row[2])
+                self.customer_name = str(self.customer_name)
+            except:
+                mb.showerror("Load Invoices: Invalid Customer Name", "Customer name contains invalid characters. Please double-check excel file")
+                continue
 
-                if not isinstance(row[3], datetime):
-                    self.due_date = datetime.strptime(row[3], "%m/%d/%Y")  
-                else:
-                    self.due_date = row[3]
+            try:
+                self.invoice_number = int(self.invoice_number)
+            except:
+                print("Invoice number type: ")
+                print(type(self.invoice_number))
+                print(self.invoice_number.split())
+                mb.showerror("Load Invoices: Invalid Invoice Number", "Unable to parse invoice number. Please double check if invoice number field contains only integers and is properly formatted.")
+                continue
 
-                new_entry = {
-                    "customer_name": self.customer_name,
-                    "amount": self.amount_due,
-                    "due_date": self.due_date
-                }
+            try:
+                self.amount_due = float(self.amount_due)
+            except:
+                mb.showerror("Load Invoices: Invalid Amount Due", "Unable to parse amount due. Please double check if amount due contains valid float/decimals and is properly formatted.")
+                continue
 
-                print(new_entry)
+            new_invoice = {
+                "customer_name": self.customer_name,
+                "amount": self.amount_due,
+                "due_date": self.due_date
+            }
 
-                if self.invoice_number not in self.invoices:
-                    self.invoices[self.invoice_number] = {}  # Removed unnecessary dictionary initialization
-                self.invoices[self.invoice_number] = new_entry
+            self.invoices[self.invoice_number] = new_invoice
 
-            except IndexError as e:  # More specific exception handling
-                print(e)
-                mb.showerror("Load Invoices: Error Loading Invoices", "An error occurred while loading the invoices. Please check the 'ARAR.xlsx' file and make sure everything is in its proper format.")
-                return
-            print(self.invoices)
-            
+            print()
+            print("Customer Name:")
+            print(self.customer_name)
+            print("Invoice Number:")
+            print(self.invoice_number)
+            print("Amount Due:")
+            print(self.amount_due)
+            print("Due Date:")
+            print(self.due_date)
+        print(self.invoices)
 
 
-        # iterate through each row of excel spreadsheet
-        # for each row, add each invoice to a dictionary
-        return
         
 
     def create_workbook(self):
@@ -87,8 +181,17 @@ class ARARMaker(tk.Tk):
             self.workbook.save(self.file_name)
 
     def add_invoice(self):
+        self.invoice_number = self.invoice_number_entry_1.get()
+        self.customer_name = self.name_entry_1.get()
+        self.due_date = self.date_entry_1.get()
+        self.amount_due = self.amount_entry_1.get()
+
+        if not self.invoice_number or not self.customer_name or not self.due_date or not self.amount_due:
+            mb.showerror("Add invoice: Empty Fields", "Please make sure there are no empty fields before attempting to add a new invoice")
+            return
+        
         try:
-            self.invoice_number = int(self.invoice_number_entry_1.get())
+            self.invoice_number = int(self.invoice_number)
         except:
             mb.showerror("Add invoice: Invalid Invoice Number", "Please enter a valid invoice number. Omit all nondigit characters in the input field")
             return
@@ -97,20 +200,19 @@ class ARARMaker(tk.Tk):
             mb.showerror("Add invoice: Invoice number is equal to 0", "Please enter a valid invoice number greater than 0. The value entered must be greater than 0")
             return
         
-        self.customer_name = self.name_entry_1.get()
         if not self.customer_name:
             mb.showerror("Add invoice: Customer Name is Empty", "Please enter a valid customer name. The input field must not be empty.")
             return
         
         try:
-            self.due_date = datetime.strptime(self.date_entry_1.get(), "%m/%d/%Y")
+            self.due_date = datetime.strptime(self.due_date, "%m/%d/%Y")
             self.days_overdue = (self.due_date - datetime.today()).days
         except ValueError:
             mb.showerror("Add invoice: Invalid Due Date", "Please enter a valid date before today following the format: mm/dd/yyyy")
             return
 
         try:
-            self.amount_due = float(self.amount_entry_1.get())
+            self.amount_due = float(self.amount_due)
         except ValueError:
             mb.showerror("Add invoice: Invalid Amount Due", "Please enter a valid amount. Omit all nondigit characters in the input field")
             return
@@ -119,18 +221,20 @@ class ARARMaker(tk.Tk):
             mb.showerror("Add invoice: Amount due is equal to 0", "Please enter an amount greater than 0. The value entered must be greater than 0")
             return
 
-        # load invoices
+        for invoice_number, invoice in self.invoices.items():
+            if self.invoice_number == invoice_number:
+                mb.showerror("Add invoice: Invoice number already taken", "Please enter a valid invoice number that hasn't already been taken up.")
+                return
 
-        # perform input validation:
-            # nothing is blank
-            # check if invoice number is int and positive
-            # check if due date is in valid format
-            # check if due date is not before current date
-            # check if amount is float and positive
-        # check if invoice exists
-        # open a popup window to confirm if user wants to add invoice
-            # if user confirms, add that invoice to current invoice spreadsheet
-            # regardless, clear entries afterwards
+        new_invoice = {
+            "customer_name": self.customer_name,
+            "amount": self.amount_due,
+            "due_date": self.due_date
+        }
+
+        self.invoices[self.invoice_number] = new_invoice
+        self.update_invoices()
+
         return
 
     def delete_invoice(self):
@@ -181,7 +285,7 @@ class ARARMaker(tk.Tk):
         self.amount_entry_1.grid(row=3, column=3, pady=5, padx=7)
 
         # put command here
-        self.add_invoice_button = Button(self.user_interface_frame, text="Add Invoice", font=("Courier", 15, "bold"))
+        self.add_invoice_button = Button(self.user_interface_frame, text="Add Invoice", font=("Courier", 15, "bold"), command=self.add_invoice)
         self.add_invoice_button.grid(row=1, column=2, columnspan=2, pady=5)
 
         # delete invoice feature
