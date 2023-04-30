@@ -1,4 +1,5 @@
 import openpyxl
+from openpyxl.utils import get_column_letter
 from datetime import datetime
 import os
 import tkinter as tk
@@ -24,6 +25,7 @@ class ARARMaker(tk.Tk):
         self.make_user_interface()
         self.create_workbook()
         self.load_invoices()
+        self.update_invoices()
         self.mainloop()
 
         return
@@ -45,7 +47,10 @@ class ARARMaker(tk.Tk):
             invoice_amount = float(invoice["amount"])
             customer_name = invoice["customer_name"]
             due_date = invoice["due_date"]
-            days_overdue = (self.due_date - datetime.today()).days
+            print(due_date)
+            print(datetime.today())
+            days_overdue = (due_date - datetime.today()).days
+            print("DAYS OVERDUE: " + str(days_overdue))
 
             self.invoice_total += invoice_amount
 
@@ -55,39 +60,45 @@ class ARARMaker(tk.Tk):
             self.worksheet.cell(row=row, column=4, value=due_date)
             self.worksheet.cell(row=row, column=5, value=days_overdue)
 
-            if days_overdue / 30 <= 0:
+            if days_overdue < 0:
                 self.worksheet.cell(row=row, column=6, value=invoice_amount)
                 self.period_totals[0] += invoice_amount
+                print("<0 DAYS")
             else:
                 self.worksheet.cell(row=row, column=6, value=0)
 
-            if days_overdue / 30 <= 1 and days_overdue / 30 > 0:
+            if days_overdue >= 0 and days_overdue <= 30:
                 self.worksheet.cell(row=row, column=7, value=invoice_amount)
                 self.period_totals[1] += invoice_amount
+                print("0-30 DAYS")
             else:
                 self.worksheet.cell(row=row, column=7, value=0)
 
-            if days_overdue / 30 <= 2 and days_overdue / 30 >  3:
+            if days_overdue >= 31 and days_overdue <= 60:
                 self.worksheet.cell(row=row, column=8, value=invoice_amount)
                 self.period_totals[2] += invoice_amount
+                print("31-60 DAYS")
             else:
                 self.worksheet.cell(row=row, column=8, value=0)
 
-            if days_overdue / 30 <= 3 and days_overdue / 30 > 4:
+            if days_overdue >= 61 and days_overdue <= 90:
                 self.worksheet.cell(row=row, column=9, value=invoice_amount)
                 self.period_totals[3] += invoice_amount
+                print("61-90 DAYS")
             else:
                 self.worksheet.cell(row=row, column=9, value=0)
 
-            if days_overdue / 30 <= 4 and days_overdue / 30 > 5:
+            if days_overdue >= 91 and days_overdue <= 120:
                 self.worksheet.cell(row=row, column=10, value=invoice_amount)
                 self.period_totals[4] += invoice_amount
+                print("91-120 DAYS")
             else:
                 self.worksheet.cell(row=row, column=10, value=0)
 
-            if days_overdue / 30 > 6:
+            if days_overdue > 120:
                 self.worksheet.cell(row=row, column=11, value=invoice_amount)
                 self.period_totals[5] += invoice_amount
+                print("120+ DAYS")
             else:
                 self.worksheet.cell(row=row, column=11, value=0)
                 
@@ -98,6 +109,12 @@ class ARARMaker(tk.Tk):
         
         for i in range(len(self.period_totals)):
             self.worksheet.cell(row=row, column=6+i, value=self.period_totals[i])
+
+        column_letter = get_column_letter(4)
+        for cell in self.worksheet[column_letter]:
+            cell.number_format = "dd/mm/yyyy"
+
+        self.worksheet.column_dimensions[column_letter].auto_size = True
 
         self.file_name = "ARAR.xlsx"
         self.workbook.save(self.file_name)
@@ -118,13 +135,11 @@ class ARARMaker(tk.Tk):
 
             # make try catch statements for typecasting each variable
             if not self.customer_name:
-                mb.showerror("Load Invoices: Empty Customer name", "Customer name is empty. Please enter a customer name in the excel file.")
                 continue
 
             try:
                 self.customer_name = str(self.customer_name)
             except:
-                mb.showerror("Load Invoices: Invalid Customer Name", "Customer name contains invalid characters. Please double-check excel file")
                 continue
 
             try:
@@ -133,13 +148,11 @@ class ARARMaker(tk.Tk):
                 print("Invoice number type: ")
                 print(type(self.invoice_number))
                 print(self.invoice_number.split())
-                mb.showerror("Load Invoices: Invalid Invoice Number", "Unable to parse invoice number. Please double check if invoice number field contains only integers and is properly formatted.")
                 continue
 
             try:
                 self.amount_due = float(self.amount_due)
             except:
-                mb.showerror("Load Invoices: Invalid Amount Due", "Unable to parse amount due. Please double check if amount due contains valid float/decimals and is properly formatted.")
                 continue
 
             new_invoice = {
@@ -176,6 +189,12 @@ class ARARMaker(tk.Tk):
             # Loop through the headers and set the values in the cells
             for index, header in enumerate(self.headers):
                 self.worksheet.cell(row=1, column=index+1, value=header)
+            
+            column_letter = get_column_letter(4)
+            for cell in self.worksheet[column_letter]:
+                cell.number_format = "dd/mm/yyyy"
+            
+            self.worksheet.column_dimensions[column_letter].auto_size = True
 
             self.file_name = "ARAR.xlsx"
             self.workbook.save(self.file_name)
@@ -235,6 +254,8 @@ class ARARMaker(tk.Tk):
         self.invoices[self.invoice_number] = new_invoice
         self.update_invoices()
 
+        mb.showinfo("Add invoice: Successfully Added Invoice", "Invoice successfully added.")
+
         return
 
     def delete_invoice(self):
@@ -247,6 +268,72 @@ class ARARMaker(tk.Tk):
             # display all valid data about that invoice
             # if user confirms, delete that invoice 
             # regardless, clear entries afterwards
+
+            
+        self.invoice_number = self.invoice_number_entry_2.get()
+        self.customer_name = self.name_entry_2.get()
+        self.due_date = self.date_entry_2.get()
+        self.amount_due = self.amount_entry_2.get()
+
+        try:
+            self.invoice_number = int(self.invoice_number)
+        except:
+            mb.showerror("Delete invoice: Invalid Invoice Number", "Please enter a valid invoice number. Omit all nondigit characters in the input field")
+            return
+
+        if self.invoice_number:
+            try:
+                self.invoice_number = int(self.invoice_number)
+            except:
+                mb.showerror("Delete invoice: Invalid Invoice Number", "Please enter a valid invoice number. Omit all nondigit characters in the input field")
+                return
+            
+            if self.invoice_number <= 0:
+                mb.showerror("Delete invoice: Invoice number is equal to 0", "Please enter a valid invoice number greater than 0. The value entered must be greater than 0")
+                return
+
+        if self.customer_name:
+            try:
+                self.due_date = datetime.strptime(self.due_date, "%m/%d/%Y")
+                self.days_overdue = (self.due_date - datetime.today()).days
+            except ValueError:
+                mb.showerror("Delete invoice: Invalid Due Date", "Please enter a valid date before today following the format: mm/dd/yyyy")
+                return
+
+        if self.amount_due:
+            try:
+                self.amount_due = float(self.amount_due)
+            except ValueError:
+                mb.showerror("Delete invoice: Invalid Amount Due", "Please enter a valid amount. Omit all nondigit characters in the input field")
+                return
+
+            if self.amount_due <= 0:
+                mb.showerror("Delete invoice: Amount due is equal to 0", "Please enter an amount greater than 0. The value entered must be greater than 0")
+                return
+        
+        found = False
+
+        for invoice_number, invoice in self.invoices.items():
+            if self.invoice_number == invoice_number:
+                if self.customer_name and self.customer_name is not invoice['customer_name']:
+                    mb.showerror("Delete invoice: Customer Name Not Found", "Please enter a valid customer name. An invoice with that customer name cannot be found within the ARAR report")
+                    return
+                if self.due_date and self.due_date is not invoice['due_date']:
+                    mb.showerror("Delete invoice: Due Date Not Found", "Please enter a valid due date. An invoice with that due date cannot be found within the ARAR report")
+                    return
+                if self.amount_due and self.amount_due is not invoice['amount']:
+                    mb.showerror("Delete invoice: Amount Not Found", "Please enter a valid amount due. An invoice with that amount due cannot be found within the ARAR report")
+                    return
+
+                found = True
+
+        if not found:
+            mb.showerror("Delete invoice: Invoice Number Not Found", "Please enter a valid invoice number. Please check if the invoice number you entered can be found on the spreadsheet")
+            return
+
+        del self.invoices[self.invoice_number]
+        self.update_invoices()
+        mb.showinfo("Delete invoice: Successfully Removed Invoice", "Invoice successfully removed.")
         return
     
     def view_invoices(self):
@@ -313,7 +400,7 @@ class ARARMaker(tk.Tk):
         self.amount_entry_2 = Entry(self.user_interface_frame, width=30, borderwidth=5)
         self.amount_entry_2.grid(row=7, column=3, pady=5, padx=7)
 
-        self.delete_invoice_button = Button(self.user_interface_frame, text="Delete Invoice", font=("Courier", 15, "bold"))
+        self.delete_invoice_button = Button(self.user_interface_frame, text="Delete Invoice", font=("Courier", 15, "bold"), command=self.delete_invoice)
         self.delete_invoice_button.grid(row=5, column=2, columnspan=2, pady=5)
 
         # listbox and view invoices button
@@ -324,7 +411,7 @@ class ARARMaker(tk.Tk):
         self.item_listbox = Listbox(self.user_interface_frame, width=65, height=12, selectmode="SINGLE", borderwidth=5)
         self.item_listbox.grid(row=10, column=1, columnspan=2, pady=5)
 
-        self.view_invoices_button = Button(self.user_interface_frame, text="View AR Aging Report", font=("Courier", 15, "bold"))
+        self.view_invoices_button = Button(self.user_interface_frame, text="View AR Aging Report", font=("Courier", 15, "bold"), command=lambda: os.system("start excel.exe ARAR.xlsx"))
         self.view_invoices_button.grid(row=11, column=1, columnspan=2, pady=5)
 
 
