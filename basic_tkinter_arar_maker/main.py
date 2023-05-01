@@ -5,7 +5,6 @@ import os
 import tkinter as tk
 from tkinter import *
 from tkinter import messagebox as mb
-import itertools
 
 class ARARMaker(tk.Tk):
     def __init__(self):
@@ -26,8 +25,23 @@ class ARARMaker(tk.Tk):
         self.create_workbook()
         self.load_invoices()
         self.update_invoices()
+        self.update_statistics()
         self.mainloop()
 
+        return
+
+    def update_statistics(self):
+        self.item_listbox.config(state=NORMAL)
+        self.item_listbox.delete(1, END)
+        self.item_listbox.insert(END, f"Total Amount Due: {self.invoice_total} \n")
+        self.item_listbox.insert(END, f"\n")
+        self.item_listbox.insert(END, f"Total Amount overdue (<0 days): {self.period_totals[0]} \n")
+        self.item_listbox.insert(END, f"Total Amount due in 0-30 days: {self.period_totals[1]} \n")
+        self.item_listbox.insert(END, f"Total Amount due in 31-60 days: {self.period_totals[2]} \n")
+        self.item_listbox.insert(END, f"Total Amount due in 61-90 days: {self.period_totals[3]} \n")
+        self.item_listbox.insert(END, f"Total Amount due in 91-120 days: {self.period_totals[4]} \n")
+        self.item_listbox.insert(END, f"Total Amount due in >120 days: {self.period_totals[5]} \n")
+        self.item_listbox.config(state=DISABLED)
         return
 
     def update_invoices(self):
