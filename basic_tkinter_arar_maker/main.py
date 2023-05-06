@@ -267,23 +267,13 @@ class ARARMaker(tk.Tk):
 
         self.invoices[self.invoice_number] = new_invoice
         self.update_invoices()
+        self.update_statistics()
 
         mb.showinfo("Add invoice: Successfully Added Invoice", "Invoice successfully added.")
 
         return
 
     def delete_invoice(self):
-        # perform input validation:
-            # nothing is blank
-            # check if invoice number is int and positive
-        # check if invoice exists in ARAR
-            # if invoice number is the only input: use that criteria only
-        # open a popup window to confirm if user wants to delete invoice 
-            # display all valid data about that invoice
-            # if user confirms, delete that invoice 
-            # regardless, clear entries afterwards
-
-            
         self.invoice_number = self.invoice_number_entry_2.get()
         self.customer_name = self.name_entry_2.get()
         self.due_date = self.date_entry_2.get()
@@ -347,6 +337,7 @@ class ARARMaker(tk.Tk):
 
         del self.invoices[self.invoice_number]
         self.update_invoices()
+        self.update_statistics()
         mb.showinfo("Delete invoice: Successfully Removed Invoice", "Invoice successfully removed.")
         return
     
@@ -427,8 +418,6 @@ class ARARMaker(tk.Tk):
 
         self.view_invoices_button = Button(self.user_interface_frame, text="View AR Aging Report", font=("Courier", 15, "bold"), command=lambda: os.system("start excel.exe ARAR.xlsx"))
         self.view_invoices_button.grid(row=11, column=1, columnspan=2, pady=5)
-
-
 
 if __name__ == "__main__":
     arar_maker = ARARMaker()
