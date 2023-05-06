@@ -4,6 +4,7 @@ from datetime import datetime
 import os
 from customtkinter import *
 import customtkinter as ctk
+from tkinter import messagebox as mb
 
 class ARARMaker(ctk.CTk):
     def __init__(self):
@@ -31,21 +32,165 @@ class ARARMaker(ctk.CTk):
         return
 
     def update_invoices(self):
+        # test me
+        self.workbook = openpyxl.Workbook()
+        self.worksheet = self.workbook.active
+        self.worksheet.title = "ARAR"
+
+        self.headers = ["Customer Name", "Invoice Number", "Invoice Amount", "Due Date", "Days Overdue", "<0 days", "0-30 days", "31-60 days", "61-90 days", "91-120 days", "Over 120 days"]
+
+        # Loop through the headers and set the values in the cells
+        for index, header in enumerate(self.headers):
+            self.worksheet.cell(row=1, column=index+1, value=header)
+        
+        row = 2
+        for invoice_number, invoice in self.invoices.items():
+            invoice_amount = float(invoice["amount"])
+            customer_name = invoice["customer_name"]
+            due_date = invoice["due_date"]
+            print(due_date)
+            print(datetime.today())
+            days_overdue = (due_date - datetime.today()).days
+            print("DAYS OVERDUE: " + str(days_overdue))
+
+            self.invoice_total += invoice_amount
+
+            self.worksheet.cell(row=row, column=1, value=customer_name)
+            self.worksheet.cell(row=row, column=2, value=invoice_number)
+            self.worksheet.cell(row=row, column=3, value=invoice_amount)
+            self.worksheet.cell(row=row, column=4, value=due_date)
+            self.worksheet.cell(row=row, column=5, value=days_overdue)
+
+            if days_overdue < 0:
+                self.worksheet.cell(row=row, column=6, value=invoice_amount)
+                self.period_totals[0] += invoice_amount
+                print("<0 DAYS")
+            else:
+                self.worksheet.cell(row=row, column=6, value=0)
+
+            if days_overdue >= 0 and days_overdue <= 30:
+                self.worksheet.cell(row=row, column=7, value=invoice_amount)
+                self.period_totals[1] += invoice_amount
+                print("0-30 DAYS")
+            else:
+                self.worksheet.cell(row=row, column=7, value=0)
+
+            if days_overdue >= 31 and days_overdue <= 60:
+                self.worksheet.cell(row=row, column=8, value=invoice_amount)
+                self.period_totals[2] += invoice_amount
+                print("31-60 DAYS")
+            else:
+                self.worksheet.cell(row=row, column=8, value=0)
+
+            if days_overdue >= 61 and days_overdue <= 90:
+                self.worksheet.cell(row=row, column=9, value=invoice_amount)
+                self.period_totals[3] += invoice_amount
+                print("61-90 DAYS")
+            else:
+                self.worksheet.cell(row=row, column=9, value=0)
+
+            if days_overdue >= 91 and days_overdue <= 120:
+                self.worksheet.cell(row=row, column=10, value=invoice_amount)
+                self.period_totals[4] += invoice_amount
+                print("91-120 DAYS")
+            else:
+                self.worksheet.cell(row=row, column=10, value=0)
+
+            if days_overdue > 120:
+                self.worksheet.cell(row=row, column=11, value=invoice_amount)
+                self.period_totals[5] += invoice_amount
+                print("120+ DAYS")
+            else:
+                self.worksheet.cell(row=row, column=11, value=0)
+                
+            row += 1
+        
+        self.worksheet.cell(row=row, column=2, value="Invoice Total")
+        self.worksheet.cell(row=row, column=3, value=self.invoice_total)
+        
+        for i in range(len(self.period_totals)):
+            self.worksheet.cell(row=row, column=6+i, value=self.period_totals[i])
+
+        column_letter = get_column_letter(4)
+        for cell in self.worksheet[column_letter]:
+            cell.number_format = "dd/mm/yyyy"
+
+        self.worksheet.column_dimensions[column_letter].auto_size = True
+
+        self.file_name = "ARAR.xlsx"
+        self.workbook.save(self.file_name)
         return
 
-    def load_invoices(self):
-        return
+    def load_invoices(self): 
+        print("loading invoices")
+        self.workbook = openpyxl.load_workbook(filename="ARAR.xlsx")
+        self.worksheet = self.workbook.active
+        
+        # re-do entire section below
+        i = 0
+        for row in self.worksheet.iter_rows(values_only=True):
+            self.customer_name = row[0]
+            self.invoice_number = row[1]
+            self.amount_due = row[2]
+            self.due_date = row[3]
+
+            # make try catch statements for typecasting each variable
+            if not self.customer_name:
+                continue
+
+            try:
+                self.customer_name = str(self.customer_name)
+            except:
+                continue
+
+            try:
+                self.invoice_number = int(self.invoice_number)
+            except:
+                print("Invoice number type: ")
+                print(type(self.invoice_number))
+                print(self.invoice_number.split())
+                continue
+
+            try:
+                self.amount_due = float(self.amount_due)
+            except:
+                continue
+
+            new_invoice = {
+                "customer_name": self.customer_name,
+                "amount": self.amount_due,
+                "due_date": self.due_date
+            }
+
+            self.invoices[self.invoice_number] = new_invoice
+
 
     def create_workbook(self):
-        return
+        self.workbook = openpyxl.Workbook()
+        self.worksheet = self.workbook.active
+        self.worksheet.title = "ARAR"
+
+        if not os.path.exists("ARAR.xlsx"):
+            # List of column headers
+            self.headers = ["Customer Name", "Invoice Number", "Invoice Amount", "Due Date", "Days Overdue", "<0 days", "0-30 days", "31-60 days", "61-90 days", "91-120 days", "Over 120 days"]
+
+            # Loop through the headers and set the values in the cells
+            for index, header in enumerate(self.headers):
+                self.worksheet.cell(row=1, column=index+1, value=header)
+            
+            column_letter = get_column_letter(4)
+            for cell in self.worksheet[column_letter]:
+                cell.number_format = "dd/mm/yyyy"
+            
+            self.worksheet.column_dimensions[column_letter].auto_size = True
+
+            self.file_name = "ARAR.xlsx"
+            self.workbook.save(self.file_name)
 
     def add_invoice(self):
         return
 
     def delete_invoice(self):
-        return
-
-    def view_invoices(self):
         return
 
     def make_user_interface(self):
