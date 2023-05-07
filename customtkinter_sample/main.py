@@ -10,6 +10,8 @@ class ARARMaker(ctk.CTk):
     def __init__(self):
         super().__init__()
 
+        ctk.set_appearance_mode("dark")
+        ctk.set_default_color_theme("dark-blue")  
         self.max_width = 900
         self.max_height = 575
 
@@ -23,7 +25,7 @@ class ARARMaker(ctk.CTk):
 
         self.make_user_interface()
         self.create_workbook()
-        self.load_invoices()
+        # self.load_invoices()
         self.update_invoices()
         self.update_statistics()
         self.mainloop()
@@ -197,12 +199,12 @@ class ARARMaker(ctk.CTk):
         self.user_interface_frame = CTkFrame(self, width=self.max_width, height=self.max_height)
         self.user_interface_frame.pack()
 
-        self.title_label = CTkLabel(self.user_interface_frame, text="ARAR Maker", font=("Courier", 30, "bold"))
+        self.title_label = CTkLabel(self.user_interface_frame, text="ARAR Maker", font=("Courier", 30))
         self.title_label.grid(row=0, column=1, pady=5, columnspan=2)
         
         # add invoice CTkButton
 
-        self.add_invoice_label = CTkLabel(self.user_interface_frame, text="Add an invoice", font=("Arial", 20, "bold"))
+        self.add_invoice_label = CTkLabel(self.user_interface_frame, text="Add an invoice", font=("Lucida Console", 20))
         self.add_invoice_label.grid(row=1, column=0, pady=5, columnspan=2)
 
         self.invoice_number_label_1 = CTkLabel(self.user_interface_frame, text="Invoice #")
@@ -225,13 +227,13 @@ class ARARMaker(ctk.CTk):
         self.amount_entry_1 = CTkEntry(self.user_interface_frame, width=210)
         self.amount_entry_1.grid(row=3, column=3, pady=5, padx=7)
 
-        # put command here
-        self.add_invoice_button = CTkButton(self.user_interface_frame, text="Add Invoice", font=("Courier", 15, "bold"), command=self.add_invoice)
+        # put command here #565b5e
+        self.add_invoice_button = CTkButton(self.user_interface_frame, text="Add Invoice", font=("Lucida Console", 15), command=self.add_invoice, fg_color="#343638", border_color="#565b5e")
         self.add_invoice_button.grid(row=1, column=2, columnspan=2, pady=5)
 
         # delete invoice feature
 
-        self.delete_invoice_label = CTkLabel(self.user_interface_frame, text="Delete an Invoice", font=("Arial", 20, "bold"))
+        self.delete_invoice_label = CTkLabel(self.user_interface_frame, text="Delete an Invoice", font=("Lucida Console", 20))
         self.delete_invoice_label.grid(row=5, column=0, pady=5, columnspan=2)
         
         self.invoice_number_label_2 = CTkLabel(self.user_interface_frame, text="Invoice #")
@@ -254,18 +256,18 @@ class ARARMaker(ctk.CTk):
         self.amount_entry_2 = CTkEntry(self.user_interface_frame, width=210)
         self.amount_entry_2.grid(row=7, column=3, pady=5, padx=7)
 
-        self.delete_invoice_button = CTkButton(self.user_interface_frame, text="Delete Invoice", font=("Courier", 15, "bold"), command=self.delete_invoice)
+        self.delete_invoice_button = CTkButton(self.user_interface_frame, text="Delete Invoice", font=("Courier", 15), command=self.delete_invoice, fg_color="#343638", border_color="#565b5e")
         self.delete_invoice_button.grid(row=5, column=2, columnspan=2, pady=5)
 
         # listbox and view invoices CTkButton
         
-        self.item_listbox_label = CTkLabel(self.user_interface_frame, text="AR Aging Report Overview", font=("Arial", 13))
+        self.item_listbox_label = CTkLabel(self.user_interface_frame, text="AR Aging Report Overview", font=("Lucida Console", 13))
         self.item_listbox_label.grid(row=9, column=1, columnspan=2, pady=5)
 
         self.item_listbox = CTkTextbox(self.user_interface_frame, width=300, height=215)
         self.item_listbox.grid(row=10, column=1, columnspan=2, pady=5)
 
-        self.view_invoices_button = CTkButton(self.user_interface_frame, text="View AR Aging Report", font=("Courier", 15, "bold"), command=lambda: os.system("start excel.exe ARAR.xlsx"))
+        self.view_invoices_button = CTkButton(self.user_interface_frame, text="View AR Aging Report", font=("Courier", 15), command=lambda: os.system("start excel.exe ARAR.xlsx"), fg_color="#343638", border_color="#565b5e")
         self.view_invoices_button.grid(row=11, column=1, columnspan=2, pady=5)
 
 if __name__ == "__main__":
