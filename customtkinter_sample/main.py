@@ -25,12 +25,23 @@ class ARARMaker(ctk.CTk):
 
         self.make_user_interface()
         self.create_workbook()
-        # self.load_invoices()
+        self.load_invoices()
         self.update_invoices()
         self.update_statistics()
         self.mainloop()
 
     def update_statistics(self):
+        self.item_listbox.configure(state="normal")
+        self.item_listbox.delete("1.0", "end")
+        self.item_listbox.insert("end", f"Total Amount Due: {self.invoice_total} \n")
+        self.item_listbox.insert("end", f"\n")
+        self.item_listbox.insert("end", f"Total Amount overdue (<0 days): {self.period_totals[0]} \n")
+        self.item_listbox.insert("end", f"Total Amount due in 0-30 days: {self.period_totals[1]} \n")
+        self.item_listbox.insert("end", f"Total Amount due in 31-60 days: {self.period_totals[2]} \n")
+        self.item_listbox.insert("end", f"Total Amount due in 61-90 days: {self.period_totals[3]} \n")
+        self.item_listbox.insert("end", f"Total Amount due in 91-120 days: {self.period_totals[4]} \n")
+        self.item_listbox.insert("end", f"Total Amount due in >120 days: {self.period_totals[5]} \n")
+        self.item_listbox.configure(state="disabled")
         return
 
     def update_invoices(self):
@@ -190,9 +201,140 @@ class ARARMaker(ctk.CTk):
             self.workbook.save(self.file_name)
 
     def add_invoice(self):
+        self.invoice_number = self.invoice_number_entry_1.get()
+        self.customer_name = self.name_entry_1.get()
+        self.due_date = self.date_entry_1.get()
+        self.amount_due = self.amount_entry_1.get()
+
+        if not self.invoice_number or not self.customer_name or not self.due_date or not self.amount_due:
+            mb.showerror("Add invoice: Empty Fields", "Please make sure there are no empty fields before attempting to add a new invoice")
+            return
+        
+        try:
+            self.invoice_number = int(self.invoice_number)
+        except:
+            mb.showerror("Add invoice: Invalid Invoice Number", "Please enter a valid invoice number. Omit all nondigit characters in the input field")
+            return
+        
+        if self.invoice_number <= 0:
+            mb.showerror("Add invoice: Invoice number is equal to 0", "Please enter a valid invoice number greater than 0. The value entered must be greater than 0")
+            return
+        
+        if not self.customer_name:
+            mb.showerror("Add invoice: Customer Name is Empty", "Please enter a valid customer name. The input field must not be empty.")
+            return
+        
+        try:
+            self.due_date = datetime.strptime(self.due_date, "%m/%d/%Y")
+            self.days_overdue = (self.due_date - datetime.today()).days
+        except ValueError:
+            mb.showerror("Add invoice: Invalid Due Date", "Please enter a valid date before today following the format: mm/dd/yyyy")
+            return
+
+        try:
+            self.amount_due = float(self.amount_due)
+        except ValueError:
+            mb.showerror("Add invoice: Invalid Amount Due", "Please enter a valid amount. Omit all nondigit characters in the input field")
+            return
+
+        if self.amount_due <= 0:
+            mb.showerror("Add invoice: Amount due is equal to 0", "Please enter an amount greater than 0. The value entered must be greater than 0")
+            return
+
+        for invoice_number, invoice in self.invoices.items():
+            if self.invoice_number == invoice_number:
+                mb.showerror("Add invoice: Invoice number already taken", "Please enter a valid invoice number that hasn't already been taken up.")
+                return
+
+        new_invoice = {
+            "customer_name": self.customer_name,
+            "amount": self.amount_due,
+            "due_date": self.due_date
+        }
+
+        self.invoices[self.invoice_number] = new_invoice
+        self.update_invoices()
+
+        mb.showinfo("Add invoice: Successfully Added Invoice", "Invoice successfully added.")
         return
 
     def delete_invoice(self):
+        # perform input validation:
+            # nothing is blank
+            # check if invoice number is int and positive
+        # check if invoice exists in ARAR
+            # if invoice number is the only input: use that criteria only
+        # open a popup window to confirm if user wants to delete invoice 
+            # display all valid data about that invoice
+            # if user confirms, delete that invoice 
+            # regardless, clear entries afterwards
+
+            
+        self.invoice_number = self.invoice_number_entry_2.get()
+        self.customer_name = self.name_entry_2.get()
+        self.due_date = self.date_entry_2.get()
+        self.amount_due = self.amount_entry_2.get()
+
+        try:
+            self.invoice_number = int(self.invoice_number)
+        except:
+            mb.showerror("Delete invoice: Invalid Invoice Number", "Please enter a valid invoice number. Omit all nondigit characters in the input field")
+            return
+
+        if self.invoice_number:
+            try:
+                self.invoice_number = int(self.invoice_number)
+            except:
+                mb.showerror("Delete invoice: Invalid Invoice Number", "Please enter a valid invoice number. Omit all nondigit characters in the input field")
+                return
+            
+            if self.invoice_number <= 0:
+                mb.showerror("Delete invoice: Invoice number is equal to 0", "Please enter a valid invoice number greater than 0. The value entered must be greater than 0")
+                return
+
+        if self.customer_name:
+            try:
+                self.due_date = datetime.strptime(self.due_date, "%m/%d/%Y")
+                self.days_overdue = (self.due_date - datetime.today()).days
+            except ValueError:
+                mb.showerror("Delete invoice: Invalid Due Date", "Please enter a valid date before today following the format: mm/dd/yyyy")
+                return
+
+        if self.amount_due:
+            try:
+                self.amount_due = float(self.amount_due)
+            except ValueError:
+                mb.showerror("Delete invoice: Invalid Amount Due", "Please enter a valid amount. Omit all nondigit characters in the input field")
+                return
+
+            if self.amount_due <= 0:
+                mb.showerror("Delete invoice: Amount due is equal to 0", "Please enter an amount greater than 0. The value entered must be greater than 0")
+                return
+        
+        found = False
+
+        for invoice_number, invoice in self.invoices.items():
+            if self.invoice_number == invoice_number:
+                if self.customer_name and self.customer_name is not invoice['customer_name']:
+                    mb.showerror("Delete invoice: Customer Name Not Found", "Please enter a valid customer name. An invoice with that customer name cannot be found within the ARAR report")
+                    return
+                if self.due_date and self.due_date is not invoice['due_date']:
+                    mb.showerror("Delete invoice: Due Date Not Found", "Please enter a valid due date. An invoice with that due date cannot be found within the ARAR report")
+                    return
+                if self.amount_due and self.amount_due is not invoice['amount']:
+                    mb.showerror("Delete invoice: Amount Not Found", "Please enter a valid amount due. An invoice with that amount due cannot be found within the ARAR report")
+                    return
+
+                found = True
+
+        if not found:
+            mb.showerror("Delete invoice: Invoice Number Not Found", "Please enter a valid invoice number. Please check if the invoice number you entered can be found on the spreadsheet")
+            return
+
+        del self.invoices[self.invoice_number]
+        self.update_invoices()
+        mb.showinfo("Delete invoice: Successfully Removed Invoice", "Invoice successfully removed.")
+        return
         return
 
     def make_user_interface(self):
