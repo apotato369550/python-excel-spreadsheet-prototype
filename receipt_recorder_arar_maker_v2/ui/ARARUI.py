@@ -238,6 +238,7 @@ class ARARUI(ctk.CTkToplevel):
 
         self.invoices[self.invoice_number] = new_invoice
         self.update_invoices()
+        self.update_statistics()
 
         mb.showinfo("Add invoice: Successfully Added Invoice", "Invoice successfully added.")
         return
@@ -306,6 +307,7 @@ class ARARUI(ctk.CTkToplevel):
 
         del self.invoices[self.invoice_number]
         self.update_invoices()
+        self.update_statistics()
         mb.showinfo("Delete invoice: Successfully Removed Invoice", "Invoice successfully removed.")
         return
 
