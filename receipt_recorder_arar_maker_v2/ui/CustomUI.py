@@ -3,6 +3,7 @@ from customtkinter import *
 import customtkinter as ctk
 from .POUI import POUI
 from .ARARUI import ARARUI
+from .ReadmeUI import ReadmeUI
 
 class CustomUI(ctk.CTk):
     def __init__(self) -> None:
@@ -36,12 +37,10 @@ class CustomUI(ctk.CTk):
         self.open_receivables_manager_button = CTkButton(self.user_interface_frame, text="Open Receivables (ARAR) Manager", font=("Lucida Console", 15), command=lambda: ARARUI(), fg_color="#343638", border_color="#565b5e")
         self.open_receivables_manager_button.grid(row=3, column=0, pady=5)
         
-        self.open_readme_button = CTkButton(self.user_interface_frame, text="View Readme/Help Guide", font=("Lucida Console", 15), command=self.open_readme, fg_color="#343638", border_color="#565b5e")
+        self.open_readme_button = CTkButton(self.user_interface_frame, text="View Readme/Help Guide", font=("Lucida Console", 15), command=lambda: ReadmeUI(), fg_color="#343638", border_color="#565b5e")
         self.open_readme_button.grid(row=4, column=0, pady=5)
 
         self.exit_button = CTkButton(self.user_interface_frame, text="Exit Program", font=("Lucida Console", 15), command=lambda: exit(), fg_color="#343638", border_color="#565b5e")
         self.exit_button.grid(row=5, column=0, pady=5)
         return
 
-    def open_readme(self):
-        return
